@@ -24,12 +24,11 @@ def extract_next_links(url, resp):
         html_content = resp.raw_response.content.decode("utf-8", errors="ignore")
         links = set()
 
-        # Extract href links using regex
         href_links = re.findall(r'href=["\'](.*?)["\']', html_content)
 
         for link in href_links:
-            absolute_link = urljoin(url, link)  # Convert relative to absolute URLs
-            absolute_link = absolute_link.split("#")[0]  # Remove fragment identifiers
+            absolute_link = urljoin(url, link)
+            absolute_link = absolute_link.split("#")[0]
             if is_valid(absolute_link):
                 links.add(absolute_link)
 
