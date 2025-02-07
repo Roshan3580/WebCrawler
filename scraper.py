@@ -1,6 +1,4 @@
-import os
 import re
-import hashlib
 from urllib.parse import urlparse, urljoin
 from collections import Counter
 from bs4 import BeautifulSoup
@@ -13,14 +11,9 @@ longest_page = {"url": "", "count": 0}
 word_frequencies = Counter()
 visited_urls = set()
 
-SAVE_PAGES_DIR = "saved_pages"
-if not os.path.exists(SAVE_PAGES_DIR):
-    os.makedirs(SAVE_PAGES_DIR)
-
 def scraper(url, resp):
     if resp.status != 200 or not resp.raw_response:
         return []
-    save_page(url, resp)
     links = extract_next_links(url, resp)
     process_page_text(url, resp)
     return [link for link in links if is_valid(link)]
@@ -79,12 +72,3 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
-
-def save_page(url, resp):
-    try:
-        url_hash = hashlib.md5(url.encode()).hexdigest()
-        file_path = os.path.join(SAVE_PAGES_DIR, f"{url_hash}.html")
-        with open(file_path, "wb") as f:
-            f.write(resp.raw_response.content)
-    except Exception as e:
-        print(f"Error saving page {url}: {e}")
