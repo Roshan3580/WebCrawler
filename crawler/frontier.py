@@ -4,13 +4,13 @@ import shelve
 from threading import Thread, RLock
 from queue import Queue, Empty
 
-from utils import get_logger, get_urlhash, normalize
-from scraper import is_valid
+from utils import create_logger, get_url_hash, normalize_url
+from scraper import is_valid_url
 
 
 class Frontier(object):
     def __init__(self, config, restart):
-        self.logger = get_logger("FRONTIER")
+        self.logger = create_logger("FRONTIER")
         self.config = config
         self.to_be_downloaded = list()
 
@@ -41,7 +41,7 @@ class Frontier(object):
         total_count = len(self.save)
         tbd_count = 0
         for url, completed in self.save.values():
-            if not completed and is_valid(url):
+            if not completed and is_valid_url(url):
                 self.to_be_downloaded.append(url)
                 tbd_count += 1
         self.logger.info(
@@ -55,15 +55,15 @@ class Frontier(object):
             return None
 
     def add_url(self, url):
-        url = normalize(url)
-        urlhash = get_urlhash(url)
+        url = normalize_url(url)
+        urlhash = get_url_hash(url)
         if urlhash not in self.save:
             self.save[urlhash] = (url, False)
             self.save.sync()
             self.to_be_downloaded.append(url)
 
     def mark_url_complete(self, url):
-        urlhash = get_urlhash(url)
+        urlhash = get_url_hash(url)
         if urlhash not in self.save:
             # This should not happen.
             self.logger.error(

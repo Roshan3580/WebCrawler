@@ -14,15 +14,15 @@ stats = {
 }
 
 
-def scraper(url, resp):
+def scrape_links(url, resp, allowed_domains=None, blocked_extensions=None):
     if resp.status != 200 or not resp.raw_response:
         return []
-    links = extract_next_links(url, resp)
-    analyze_text_content(url, resp)
+    links = extract_links(url, resp, allowed_domains, blocked_extensions)
+    analyze_page_content(url, resp)
     return links
 
 
-def extract_next_links(url, resp):
+def extract_links(url, resp, allowed_domains=None, blocked_extensions=None):
     extracted_links = set()
     try:
         soup = BeautifulSoup(resp.raw_response.content, "html.parser")
@@ -31,7 +31,7 @@ def extract_next_links(url, resp):
             full_link = urljoin(url, tag["href"])
             full_link = full_link.split("#")[0]
 
-            if is_valid(full_link):
+            if is_valid_url(full_link, allowed_domains, blocked_extensions):
                 extracted_links.add(full_link)
 
     except Exception as e:
@@ -40,7 +40,7 @@ def extract_next_links(url, resp):
     return list(extracted_links)
 
 
-def analyze_text_content(url, resp):
+def analyze_page_content(url, resp):
     try:
         soup = BeautifulSoup(resp.raw_response.content, "html.parser")
         text = soup.get_text()
@@ -60,25 +60,31 @@ def tokenize(text):
     return [word for word in words if word not in STOPWORDS]
 
 
-def is_valid(url):
+def is_valid_url(url, allowed_domains=None, blocked_extensions=None):
     """
-    Determines if a URL should be crawled based on domain restrictions and file types.
+    Determines if a URL should be crawled based on scheme and file types.
+    Optionally restricts by domain and file extension.
+    Args:
+        url (str): The URL to validate.
+        allowed_domains (set, optional): If provided, only allow these domains.
+        blocked_extensions (str, optional): Regex string of blocked file extensions.
+    Returns:
+        bool: True if the URL is valid for crawling, False otherwise.
     """
     try:
         parsed = urlparse(url)
         if parsed.scheme not in {"http", "https"}:
             return False
-
-        # Define allowed domains
-        allowed_domains = {"ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu"}
-        if parsed.hostname not in allowed_domains:
-            return False
-
-        # Restrict file extensions (avoiding non-HTML content)
-        return not re.search(
-            r'\.(css|js|bmp|gif|jpeg|jpg|ico|png|tiff|mp3|mp4|wav|avi|mov|mpeg|m4v|mkv|ogg|pdf'
-            r'|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub'
-            r'|dll|cnf|tgz|sha1|thmx|mso|arff|rtf|jar|csv|rm|wmv|swf|wma|zip|rar|gz)$', parsed.path.lower())
-
+        if allowed_domains is not None:
+            if parsed.hostname not in allowed_domains:
+                return False
+        # Default blocked extensions (non-HTML content)
+        if blocked_extensions is None:
+            blocked_extensions = (
+                r'\.(css|js|bmp|gif|jpeg|jpg|ico|png|tiff|mp3|mp4|wav|avi|mov|mpeg|m4v|mkv|ogg|pdf'
+                r'|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub'
+                r'|dll|cnf|tgz|sha1|thmx|mso|arff|rtf|jar|csv|rm|wmv|swf|wma|zip|rar|gz)$'
+            )
+        return not re.search(blocked_extensions, parsed.path.lower())
     except TypeError:
         return False
