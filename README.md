@@ -1,46 +1,38 @@
 # Modular Interactive Web Crawler
 
-This project is a fully refactored, modular, and interactive web crawler and URL extractor. It allows users to specify a starting URL and optional filters for domains, file types, and crawl depth. The crawler traverses the web, extracts all valid links, and prints them in real time.
+## Project Overview
+This project is a modular, interactive web crawler and URL extractor. It allows users to explore the web starting from any URL, with customizable options for domain and file type filtering, crawl depth, and politeness delay. The crawler traverses web pages, extracts all valid links, and provides real-time feedback and statistics.
 
-## Features
-- Interactive prompts for starting URL, allowed domains, file type filters, and crawl depth
-- Crawls any website (not limited to specific domains)
-- Extracts and prints all discovered URLs as it crawls
-- Supports filtering by domain and file extension (customizable at runtime)
-- Avoids revisiting URLs
-- Politeness delay between requests
-- Word statistics (longest page, word frequencies)
-- Clean, modular codebase for easy extension
+## Technologies Used
+- **Python 3**
+- **requests**: For making HTTP requests and downloading web pages
+- **beautifulsoup4**: For parsing HTML and extracting links and text
 
-## Project Structure
+## What the Project Returns
+- Prints each crawled URL and every extracted link in real time
+- Displays the longest page by word count
+- Shows the top 10 most frequent words found during the crawl
 
-```
-webcrawler/
-│
-├── crawler/
-│   ├── __init__.py
-│   ├── core.py         # Main crawling logic (queue, visited, politeness, etc.)
-│   └── filters.py      # Filtering logic (domains, extensions, etc.)
-│
-├── extract/
-│   ├── __init__.py
-│   └── links.py        # HTML parsing and link extraction
-│
-├── cli/
-│   ├── __init__.py
-│   └── interactive.py  # User prompts and argument parsing
-│
-├── main.py             # Entry point, glues everything together
-├── README.md           # Project documentation
-└── requirements.txt    # Python dependencies
-```
+## What the Project Asks the User For
+When you run the crawler, you will be prompted for:
+- The starting URL to crawl
+- (Optional) Domains to restrict crawling to
+- (Optional) File extensions to block (as a regex)
+- (Optional) Maximum crawl depth
+- (Optional) Politeness delay (seconds between requests)
 
-## Usage
+## How to Use
+1. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+2. Run the crawler:
+   ```
+   python main.py
+   ```
+3. Follow the interactive prompts to configure your crawl and view results in real time.
 
-Run the crawler interactively:
-
-```
-python main.py
-```
-
-Follow the prompts to start crawling and extracting URLs!
+## Contact
+For questions or feedback, contact:
+**Roshan Raj**  
+roshanraj@uci.edu
